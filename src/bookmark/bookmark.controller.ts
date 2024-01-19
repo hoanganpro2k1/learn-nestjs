@@ -1,7 +1,10 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
@@ -11,6 +14,7 @@ import {
 import { JwtGuard } from 'src/guard';
 import { BookmarkService } from './bookmark.service';
 import { GetUser } from 'src/decorator';
+import { CreateBookmarkDto, EditBookmarkDto } from './dto';
 
 @UseGuards(JwtGuard)
 @Controller('bookmarks')
@@ -18,20 +22,41 @@ export class BookmarkController {
   constructor(private bookmarkService: BookmarkService) {}
 
   @Get()
-  getBookmarks(@GetUser('id') userId: number) {}
+  getBookmarks(@GetUser('id') userId: number) {
+    return this.bookmarkService.getBookmarks(userId);
+  }
 
   @Get(':id')
   getBookmarkById(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) bookmarkId: number,
-  ) {}
+  ) {
+    return this.getBookmarkById(userId, bookmarkId);
+  }
 
   @Post()
-  createBookmark(@GetUser('id') userId: number) {}
+  createBookmark(
+    @GetUser('id') userId: number,
+    @Body() dto: CreateBookmarkDto,
+  ) {
+    return this.bookmarkService.createBookmark(userId, dto);
+  }
 
-  @Patch()
-  editBookmarkById(@GetUser('id') userId: number) {}
+  @Patch(':id')
+  editBookmarkById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) bookmarkId: number,
+    @Body() dto: EditBookmarkDto,
+  ) {
+    this.editBookmarkById(userId, bookmarkId, dto);
+  }
 
-  @Delete()
-  deleteBookmarkById(@GetUser('id') userId: number) {}
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteBookmarkById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) bookmarkId: number,
+  ) {
+    return this.deleteBookmarkById(userId, bookmarkId);
+  }
 }
